@@ -1,0 +1,105 @@
+{% extends 'template.html' %}
+{% load static %}
+{% block title %}
+    Bucket Files
+{% endblock %}
+{% block 'stylesheet' %}
+{% endblock %}
+
+{% block 'titulo-secao' %}
+    Bucket Files
+
+{% endblock %}
+{% block 'card' %}
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="float-sm-right">
+                    <form method="post" class="form-inline" action="{% url 'bucket:upload_file' %}"
+                          enctype='multipart/form-data'>
+                        {% csrf_token %}
+                        <input type="hidden" id="bucket" name="bucket" value="{{ bucket_name }}">
+                        <div class="form-group mx-sm-3 mb-2">
+                            <input type="file" class="form-control-file" id="file" name="file" multiple required>
+                        </div>
+                        <button type="submit" class="btn btn-info mb-2">Upload files</button>
+                    </form>
+                </div>
+                <br>
+                <div class='col-sm-12 table-responsive-sm'>
+                    <table id="table-buckets" class="table table-bordered table-hover "
+                           cellspacing="0" width="100%">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Last Modified</th>
+                            <th>Size</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for file in files %}
+                            <tr>
+                                <td><a href="#"> {{ file.Key }}</a></td>
+                                <td>{{ file.LastModified }}</td>
+                                <td>{{ file.Size }}</td>
+                                <td>
+                                    <button class="btn bg-info btn-sm"
+                                            onclick="get_file(`{{ file.Key }}`)"
+                                            title="Download"><i class="fas fa-download"></i></button>
+
+                                    <a class="btn bg-danger btn-sm" title="Remover"
+                                       href="{% url 'bucket:delete_file' bucket=bucket_name file=file.Key %}"><i
+                                            class="far fa-trash-alt"></i></a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block 'scripts' %}
+    <script>
+        function get_file(key) {
+            let bucket = $("#bucket").val()
+            $.ajax({
+                url: '{% url 'bucket:download_file' %}',
+                type: 'get',
+                data: {
+                    'file': key,
+                    'bucket': bucket
+                },
+
+                success: function (data) {
+                    let url = (data['url'])
+                    let a = document.createElement('a');
+                    a.href = url;
+                    a.download = key;
+                    document.body.append(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                },
+                error: function (response) {
+                    // alert the error if any error occured
+                    console.log(response)
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            $('#table-buckets').DataTable({
+                    "responsive": true,
+                    "autoWidth": false,
+                    "searching": false,
+                    "ordering": true,
+                    "bPaginate": true,
+                }
+            );
+        });
+    </script>
+{% endblock %}
