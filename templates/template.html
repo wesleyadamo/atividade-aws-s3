@@ -1,0 +1,75 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="pt-br">
+<head>
+    <title> Buckets | {% block title %} {% endblock %}</title>
+    {% include 'partials/_header.html' %}
+
+</head>
+<body class="hold-transition sidebar-collapse">
+<div class="wrapper" style="margin-left: 10px; margin-right: 10px">
+    <a onclick="topFunction()" id="return-to-top" title="Inicio da página"><i class="fas fa-chevron-up"></i></a>
+    <!-- Content Wrapper. Contains page content -->
+    {% include 'partials/_messages.html' %}
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-3">
+                    <div class="col-sm-6">
+                        <h2 class="m-0 text-dark"> {% block 'titulo-secao' %} {% endblock %}</h2>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item float-sm-right"><a href="{% url 'bucket:index' %}">Home</a></li>
+                        </ol>
+                    </div>
+                </div>
+            </div><!-- /.container-fluid -->
+        </section>
+        <!-- /.content-header -->
+        <!-- Main content -->
+        <section class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        {% block 'card' %}
+                        {% endblock %}
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <!-- /.content-wrapper -->
+    <!-- Main Footer -->
+    {% include 'partials/_footer.html' %}
+</div>
+<!-- ./wrapper -->
+<script>
+    $('.toast').toast('show');
+    var mybutton = document.getElementById("return-to-top");
+
+    window.onscroll = function () {
+        scrollFunction()
+    };
+
+    function scrollFunction() {
+        if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+            mybutton.style.display = "block";
+        } else {
+            mybutton.style.display = "none";
+        }
+    }
+
+    function topFunction() {
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+    }
+
+</script>
+{% block 'scripts' %}
+{% endblock %}
+</body>
+</html>
