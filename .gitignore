@@ -3,4 +3,4 @@ venv/
 *.pyc
 bucket/local_credentials.py
 config/local_settings.py
-static/
+/static/
