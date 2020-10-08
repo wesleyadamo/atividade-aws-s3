@@ -36,7 +36,7 @@ class RekognitionImage(Base):
     def get(self, *args, **kwargs):
         if self.request.is_ajax:
             file_name = self.request.GET.get('file', None)
-            bucket_name = 'mediafilesatv'
+            bucket_name = 'mediasfiles'
 
             obj_s3 = self.s3.get_object(
                 Bucket=bucket_name,
@@ -105,7 +105,7 @@ class Index(Base):
         # modificação devido limite no s3
         '''bucket_name = self.kwargs.get('bucket', None)
         response = self.s3.list_objects(
-            Bucket='mediafilesatv',
+            Bucket='mediasfiles',
         )
         return render(self.request, 'bucket/buckets_list_files.html', {'files': response.get('Contents'),
                                                                        'bucket_name': bucket_name,
@@ -113,10 +113,9 @@ class Index(Base):
                       )'''
 
         response = self.s3.get_object(
-            Bucket='mediafilesatv',
+            Bucket='mediasfiles',
             Key='download.jpeg'
         )
-        print(response['LastModified'])
         response = {
             'Key': 'download.jpeg',
             'LastModified': response['LastModified'],
@@ -124,7 +123,7 @@ class Index(Base):
 
         }
         return render(self.request, 'bucket/buckets_list_files.html', {'files': response,
-                                                                       'bucket_name': 'mediafilesatv',
+                                                                       'bucket_name': 'mediasfiles',
                                                                        })
 
     '''def post(self, *args, **kwargs):
