@@ -13,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'ed2b-4=5j9np)4%o(xh9jjc2(vp%+9&a4q=@znfjfpa5s2q)(k'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = False  # production
 
 ALLOWED_HOSTS = ['*']
@@ -93,9 +93,6 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'templates/static')
 ]
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
 MESSAGE_TAGS = {
     constants.DEBUG: 'alert-info',
     constants.ERROR: 'bg-danger',
@@ -104,7 +101,7 @@ MESSAGE_TAGS = {
     constants.WARNING: 'alert-warning',
 }
 
-USE_S3 = True
+USE_S3 = False
 
 try:
     from .local_settings import *  # noqa
@@ -124,7 +121,7 @@ if USE_S3:
     STATICFILES_STORAGE = 'config.storage_backends.StaticStorage'
     # s3 public media settings
     PUBLIC_MEDIA_LOCATION = 'media'
-    MEDIA_URL = f'https://mediafilespf.s3.us-east-2.amazonaws.com/'
+    MEDIA_URL = f'https://mediafilesatv.s3.us-east-2.amazonaws.com/'
     DEFAULT_FILE_STORAGE = 'config.storage_backends.PublicMediaStorage'
     # s3 private media settings
     PRIVATE_MEDIA_LOCATION = 'private'

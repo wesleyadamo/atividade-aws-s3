@@ -15,7 +15,7 @@
         <div class="card">
             <div class="card-body">
                 <div class="float-sm-right">
-                    <form method="post" class="form-inline" action="{% url 'bucket:upload_file' %}"
+                    <form method="post" class="form-inline"
                           enctype='multipart/form-data'>
                         {% csrf_token %}
                         <input type="hidden" id="bucket" name="bucket" value="{{ bucket_name }}">
@@ -38,24 +38,61 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {% for file in files %}
-                            <tr>
-                                <td><a href="#"> {{ file.Key }}</a></td>
-                                <td>{{ file.LastModified }}</td>
-                                <td>{{ file.Size }}</td>
-                                <td>
-                                    <button class="btn bg-info btn-sm"
-                                            onclick="get_file(`{{ file.Key }}`)"
-                                            title="Download"><i class="fas fa-download"></i></button>
+                        <tr>
+                            <td><a href="#"> {{ files.Key }}</a></td>
+                            <td>{{ files.LastModified }}</td>
+                            <td>{{ files.Size }}</td>
+                            <td>
+                                <button class="btn bg-success btn-sm"
+                                        onclick="get_file(`{{ files.Key }}`)"
+                                        title="Download"><i class="fas fa-download"></i></button>
+                                <button class="btn bg-info btn-sm"
+                                        onclick="get_file_details(`{{ files.Key }}`)"
+                                        title="Details"><i class="fas fa-info-circle"></i></button>
 
-                                    <a class="btn bg-danger btn-sm" title="Remover"
-                                       href="{% url 'bucket:delete_file' bucket=bucket_name file=file.Key %}"><i
-                                            class="far fa-trash-alt"></i></a>
-                                </td>
-                            </tr>
-                        {% endfor %}
+                                <a class="btn bg-danger btn-sm" title="Remover"
+                                   href="{% url 'bucket:delete_file' bucket=bucket_name file=files.Key %}"><i
+                                        class="far fa-trash-alt"></i></a>
+                            </td>
+                        </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalLong">
+        Launch demo modal
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="modalImg" tabindex="-1" role="dialog" aria-labelledby="modalImg" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Resultado da Análise</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col">
+                            <img src="" id="img">
+                        </div>
+                        <div class="col">
+                            <div id="addResult">
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -91,6 +128,41 @@
             });
         }
 
+        function get_file_details(key) {
+            let bucket = $("#bucket").val()
+            $.ajax({
+                url: '{% url 'bucket:rekognition-file' %}',
+                type: 'get',
+                data: {
+                    'file': key
+                },
+
+                success: function (data) {
+                    img = data['img']
+                    result = data['result']
+
+                    input = ''
+
+                    for (x in result)
+                        input += `<b><p style="color: ${x}">${result[x]}</p></b> <br> `
+
+
+                    $("#img").attr('src', img)
+                    $('#addResult').html("");
+
+                    $("#addResult").append(input)
+
+                    $('#modalImg').modal('show');
+
+
+                },
+                error: function (response) {
+                    // alert the error if any error occured
+                    console.log(response)
+                }
+            });
+        }
+
         $(document).ready(function () {
             $('#table-buckets').DataTable({
                     "responsive": true,
@@ -103,3 +175,4 @@
         });
     </script>
 {% endblock %}
+
