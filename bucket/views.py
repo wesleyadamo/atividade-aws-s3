@@ -22,8 +22,8 @@ class Base(View):
 
         self.session = boto3.Session(
 
-            aws_access_key_id=local_credentials.aws_access_key_id,  # removido devido o repositório tá público
-            aws_secret_access_key=local_credentials.aws_secret_access_key,  # removido devido o repositório tá público
+            aws_access_key_id=local_credentials.aws_access_key_id,  
+            aws_secret_access_key=local_credentials.aws_secret_access_key,
             region_name='us-east-2',
         )
         self.s3 = self.session.client('s3', region_name='us-east-2',
@@ -46,9 +46,7 @@ class RekognitionImage(Base):
             img = obj_s3['Body'].read()
 
             client = boto3.client('rekognition', aws_access_key_id=local_credentials.aws_access_key_id,
-                                  # removido devido o repositório tá público
                                   aws_secret_access_key=local_credentials.aws_secret_access_key,
-                                  # removido devido o repositório tá público
                                   region_name='us-east-2', )
 
             response = client.detect_faces(Image={'Bytes': img}, Attributes=['ALL'])
@@ -65,7 +63,7 @@ class RekognitionImage(Base):
                 color = "#%06x" % random.randint(0, 0xFFFFFF)
                 result[color] = f"A pessoa tem entre {str(faceDetail['AgeRange']['Low'])} a " \
                                 f" {str(faceDetail['AgeRange']['High'])} anos de idade com um nível de " \
-                                f"confiabilidade de {faceDetail['Confidence']}"
+                                f"confiança de {'%.4f' % faceDetail['Confidence']}%"
 
                 box = faceDetail['BoundingBox']
                 left = imgWidth * box['Left']

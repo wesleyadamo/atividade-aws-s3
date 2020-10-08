@@ -22,7 +22,7 @@
                         <div class="form-group mx-sm-3 mb-2">
                             <input type="file" class="form-control-file" id="file" name="file" multiple required>
                         </div>
-                        <button type="submit" class="btn btn-info mb-2">Upload files</button>
+                        <button type="#" class="btn btn-info mb-2">Upload files</button>
                     </form>
                 </div>
                 <br>
@@ -61,11 +61,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Button trigger modal -->
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalLong">
-        Launch demo modal
-    </button>
 
     <!-- Modal -->
     <div class="modal fade" id="modalImg" tabindex="-1" role="dialog" aria-labelledby="modalImg" aria-hidden="true">
@@ -138,16 +133,18 @@
                 },
 
                 success: function (data) {
-                    img = data['img']
+                    img = data['img']+"?timestamp=" + new Date().getTime()
                     result = data['result']
 
                     input = ''
 
                     for (x in result)
-                        input += `<b><p style="color: ${x}">${result[x]}</p></b> <br> `
-
+                        input += `<b><p style="color: ${x}">${result[x]}</p></b> <br>` 
 
                     $("#img").attr('src', img)
+
+
+
                     $('#addResult').html("");
 
                     $("#addResult").append(input)
