@@ -1,15 +1,17 @@
+import io
 import json
 import os
+import random
 
 import boto3
+from PIL import Image, ImageDraw
 from botocore.config import Config
 from django.conf import settings
 from django.contrib import messages
-from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views.generic.base import View
+
 from . import local_credentials
 
 
@@ -29,13 +31,103 @@ class Base(View):
                                       )
 
 
+class RekognitionImage(Base):
+
+    def get(self, *args, **kwargs):
+        if self.request.is_ajax:
+            file_name = self.request.GET.get('file', None)
+            bucket_name = 'mediafilesatv'
+
+            obj_s3 = self.s3.get_object(
+                Bucket=bucket_name,
+                Key=file_name,
+            )
+
+            img = obj_s3['Body'].read()
+
+            client = boto3.client('rekognition', aws_access_key_id=local_credentials.aws_access_key_id,
+                                  # removido devido o repositório tá público
+                                  aws_secret_access_key=local_credentials.aws_secret_access_key,
+                                  # removido devido o repositório tá público
+                                  region_name='us-east-2', )
+
+            response = client.detect_faces(Image={'Bytes': img}, Attributes=['ALL'])
+
+            stream = io.BytesIO(img)
+            image = Image.open(stream)
+
+            imgWidth, imgHeight = image.size
+            draw = ImageDraw.Draw(image)
+
+            result = {}
+
+            for x, faceDetail in enumerate(response['FaceDetails']):
+                color = "#%06x" % random.randint(0, 0xFFFFFF)
+                result[color] = f"A pessoa tem entre {str(faceDetail['AgeRange']['Low'])} a " \
+                                f" {str(faceDetail['AgeRange']['High'])} anos de idade com um nível de " \
+                                f"confiabilidade de {faceDetail['Confidence']}"
+
+                box = faceDetail['BoundingBox']
+                left = imgWidth * box['Left']
+                top = imgHeight * box['Top']
+                width = imgWidth * box['Width']
+                height = imgHeight * box['Height']
+
+                points = (
+                    (left, top),
+                    (left + width, top),
+                    (left + width, top + height),
+                    (left, top + height),
+                    (left, top)
+                )
+                draw.line(points, fill=color, width=3)
+
+            tp = os.path.join(settings.MEDIA_ROOT, 'reconhecimento.jpeg')
+
+            image.save(tp)
+
+            c = Image.open(tp)
+
+            response = {
+                'result': result,
+                'img': os.path.join(settings.MEDIA_URL, 'reconhecimento.jpeg')
+            }
+
+            return HttpResponse(
+                json.dumps(response),
+                content_type="application/json"
+            )
+
+
 class Index(Base):
 
     def get(self, *args, **kwargs):
-        response = self.s3.list_buckets()
-        return render(self.request, 'bucket/buckets_list.html', {'buckets': response['Buckets']})
+        # modificação devido limite no s3
+        '''bucket_name = self.kwargs.get('bucket', None)
+        response = self.s3.list_objects(
+            Bucket='mediafilesatv',
+        )
+        return render(self.request, 'bucket/buckets_list_files.html', {'files': response.get('Contents'),
+                                                                       'bucket_name': bucket_name,
+                                                                       }
+                      )'''
 
-    def post(self, *args, **kwargs):
+        response = self.s3.get_object(
+            Bucket='mediafilesatv',
+            Key='download.jpeg'
+        )
+        print(response['LastModified'])
+        response = {
+            'Key': 'download.jpeg',
+            'LastModified': response['LastModified'],
+            'Size': len(response['Body'].read())
+
+        }
+        return render(self.request, 'bucket/buckets_list_files.html', {'files': response,
+                                                                       'bucket_name': 'mediafilesatv',
+                                                                       })
+
+    '''def post(self, *args, **kwargs):
         bucket_name = self.request.POST.get('bucket_name', None)
         if bucket_name is not None:
             try:
@@ -49,10 +141,10 @@ class Index(Base):
             except Exception:
                 messages.error(self.request, 'Nome do bucket inválido')
 
-        return redirect('bucket:index')
+        return redirect('bucket:index')'''
 
 
-class DeleteBucket(Base):
+'''class DeleteBucket(Base):
     def get(self, *args, **kwargs):
         bucket_name = self.kwargs.get('bucket', None)
         if bucket_name is not None:
@@ -70,10 +162,9 @@ class DeleteBucket(Base):
         else:
             messages.success(self.request, 'Erro ao remover o Bucket!')
 
-        return redirect('bucket:index')
+        return redirect('bucket:index')'''
 
-
-class ShowBucket(Base):
+'''class ShowBucket(Base):
     def get(self, *args, **kwargs):
         bucket_name = self.kwargs.get('bucket', None)
         response = self.s3.list_objects(
@@ -82,7 +173,7 @@ class ShowBucket(Base):
         return render(self.request, 'bucket/buckets_list_files.html', {'files': response.get('Contents'),
                                                                        'bucket_name': bucket_name,
                                                                        }
-                      )
+                      )'''
 
 
 class DownloadFile(Base):
@@ -117,7 +208,7 @@ class DeleteFile(Base):
         return redirect('bucket:show_bucket', bucket=bucket_name)
 
 
-class UploadFile(Base):
+'''class UploadFile(Base):
     def post(self, *args, **kwargs):
         bucket_name = self.request.POST.get('bucket', None)
         files = self.request.FILES
@@ -134,4 +225,4 @@ class UploadFile(Base):
             messages.info(self.request, 'Arquivos(s) adicionado(s)')
         except:
             messages.error(self.request, 'Arquivos inválidos!')
-        return redirect('bucket:show_bucket', bucket=bucket_name)
+        return redirect('bucket:show_bucket', bucket=bucket_name)'''
