@@ -1,4 +1,4 @@
-### Aplicação de upload de arquivos com AWS S3, AWS Rekognition, AWS Lamba e AWS ECS
+## Aplicação de upload de arquivos com AWS S3, AWS Rekognition, AWS Lamba e AWS ECS
 
 A aplicação foi desenvolvida utilizando o django juntamente com as tecnologias do Amazon AWS.
 
@@ -9,7 +9,7 @@ Os arquivos da aplicação estão armazenados em buckets no S3.Para isso, foram 
 - **mediafilesresized:** arquivos gerados na função lambda.
 
 
-##### Função lambda
+### Função lambda
 
 A função lambda é responsável por criar uma imagem redimensionado proporcionalmente( largura de 200px) a cada inserção no bucket 'mediafiles' e salvar no bucket 'mediafilesresized'. O arquivo de implantação da função está definido como 'function.zip' no diretório.
 
@@ -40,7 +40,7 @@ def lambda_handler(event, context):
 ```
 
 
-###### Rekognition
+### Rekognition
 
 A função do rekognition é idenfificar faces na imagem. Caso a função identifique faces, um bounding box é criado em cada face identificada e uma mensagem é mostrada com a provável idade da pessoa e o nível de confiança. Caso não há faces na imagem, é mostrada uma mensagem.
 
