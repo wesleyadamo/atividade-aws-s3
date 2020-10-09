@@ -38,26 +38,29 @@
                         </tr>
                         </thead>
                         <tbody>
+
+                        {% for file in files %}
                         <tr>
-                            <td><a href="#"> {{ files.Key }}</a></td>
-                            <td>{{ files.LastModified }}</td>
-                            <td>{{ files.Size }}</td>
+                            <td><a href="#"> {{ file.Key }}</a></td>
+                            <td>{{ file.LastModified }}</td>
+                            <td>{{ file.Size }}</td>
                             <td>
                                 <button class="btn bg-success btn-sm"
-                                        onclick="get_file(`{{ files.Key }}`, 'mediasfiles')"
+                                        onclick="get_file(`{{ file.Key }}`, 'mediasfiles')"
                                         title="Imagem Original"><i class="fas fa-download"></i></button>
                                 <button class="btn bg-purple btn-sm"
-                                        onclick="get_file(`{{ files.Key }}`, 'mediasfilesresized')"
+                                        onclick="get_file(`{{ file.Key }}`, 'mediafilesrezised')"
                                         title="Imagem redimensionada "><i class="fas fa-download"></i></button>
                                 <button class="btn bg-info btn-sm"
-                                        onclick="get_file_details(`{{ files.Key }}`)"
+                                        onclick="get_file_details(`{{ file.Key }}`)"
                                         title="Rekognition"><i class="fas fa-info-circle"></i></button>
 
                                 <a class="btn bg-danger btn-sm" title="Remover"
-                                   href="{% url 'bucket:delete_file' bucket=bucket_name file=files.Key %}"><i
+                                   href="{% url 'bucket:delete_file' bucket=bucket_name file=file.Key %}"><i
                                         class="far fa-trash-alt"></i></a>
                             </td>
                         </tr>
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -100,6 +103,7 @@
 {% block 'scripts' %}
     <script>
         function get_file(key, bucket) {
+            alert
 
             $.ajax({
                 url: '{% url 'bucket:download_file' %}',

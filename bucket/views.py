@@ -22,13 +22,15 @@ class Base(View):
 
         self.session = boto3.Session(
 
-            aws_access_key_id=local_credentials.aws_access_key_id,  
+            aws_access_key_id=local_credentials.aws_access_key_id,
             aws_secret_access_key=local_credentials.aws_secret_access_key,
             region_name='us-east-2',
         )
         self.s3 = self.session.client('s3', region_name='us-east-2',
                                       config=Config(signature_version='s3v4')
                                       )
+        # necessário definir hard-code devido o limite de solicitações
+        self.bucket_name = 'mediasfiles'
 
 
 class RekognitionImage(Base):
@@ -36,10 +38,10 @@ class RekognitionImage(Base):
     def get(self, *args, **kwargs):
         if self.request.is_ajax:
             file_name = self.request.GET.get('file', None)
-            bucket_name = 'mediasfiles'
+            # bucket_name = self.request.GET.get('bucket_name', None)
 
             obj_s3 = self.s3.get_object(
-                Bucket=bucket_name,
+                Bucket=self.bucket_name,
                 Key=file_name,
             )
 
@@ -79,16 +81,16 @@ class RekognitionImage(Base):
                     (left, top)
                 )
                 draw.line(points, fill=color, width=3)
-
-            tp = os.path.join(settings.MEDIA_ROOT, 'reconhecimento.jpeg')
+            ext = file_name.split('.')[-1]
+            tp = os.path.join(settings.MEDIA_ROOT, f'reconhecimento.{ext}')
 
             image.save(tp)
 
-            c = Image.open(tp)
-
+            if len(result) == 0:
+                result['black'] = 'Nenhum rosto identificado'
             response = {
                 'result': result,
-                'img': os.path.join(settings.MEDIA_URL, 'reconhecimento.jpeg')
+                'img': os.path.join(settings.MEDIA_URL, f'reconhecimento.{ext}')
             }
 
             return HttpResponse(
@@ -110,18 +112,32 @@ class Index(Base):
                                                                        }
                       )'''
 
-        response = self.s3.get_object(
-            Bucket='mediasfiles',
+        file_1 = self.s3.get_object(
+            Bucket=self.bucket_name,
             Key='download.jpeg'
         )
-        response = {
+        file_2 = self.s3.get_object(
+            Bucket=self.bucket_name,
+            Key='1.png'
+        )
+        response_1 = {
             'Key': 'download.jpeg',
-            'LastModified': response['LastModified'],
-            'Size': len(response['Body'].read())
+            'LastModified': file_1['LastModified'],
+            'Size': len(file_1['Body'].read())
 
         }
+        response_2 = {
+            'Key': '1.png',
+            'LastModified': file_2['LastModified'],
+            'Size': len(file_2['Body'].read())
+
+        }
+        response = []
+        response.append(response_1)
+        response.append(response_2)
+
         return render(self.request, 'bucket/buckets_list_files.html', {'files': response,
-                                                                       'bucket_name': 'mediasfiles',
+                                                                       'bucket_name': self.bucket_name,
                                                                        })
 
     '''def post(self, *args, **kwargs):
@@ -181,7 +197,9 @@ class DownloadFile(Base):
 
             response = self.s3.generate_presigned_url('get_object',
                                                       Params={'Bucket': bucket_name,
-                                                              'Key': file_name},
+                                                              'Key': file_name,
+
+                                                              },
                                                       )
             response = {
                 'url': response
