@@ -51,7 +51,7 @@ A função do rekognition é idenfificar faces na imagem. Caso a função identi
 - Devido o limite máximo de requisições POST, PUT E LIST, apenas duas imagens são obtidas do bucket 'mediafiles' e o upload não é possível. Todas as outras funcionalidades(criar bucket, excluir bucket, upload de arquivos  e listagem de arquivos nos buckets e listagem dos buckets) estão como comentários no código para que não seja possível utilizarem.
 - Criar os arquivos local_settings.py e local_credentials.py em /config e /bucket respectivamente. Esses dois arquivos contém as credenciais de acesso as apis do AWS.
 - Foi necessário adicionar os nomes dos buckets e arquivos como hard-code devido a observação relatada no primeiro ítem.Normalmente, todos os buckets e seus arquivos são listados.
-- Há um problema no download da imagem redimensionada. Erro de região, porém os dois buckets estão com as mesmas configurações. O download da imagem original está normal, porém para a redimensionada tem esse erro de região, o que leva a crer que há algum problema na api AWS, pois os buckets são idênticos nas configurações de região, permissões, etc.
+- Há um problema no download da imagem redimensionada. Erro de região, porém os dois buckets estão com as mesmas configurações. O download da imagem original está normal, porém para a redimensionada tem esse erro de região, o que leva a crer que há algum problema na api AWS, pois os buckets são idênticos nas configurações de região, permissões, etc. ( Atualização: corrigido)
 - Aplicação sendo executada em http://13.58.188.1:5000/
 
 
